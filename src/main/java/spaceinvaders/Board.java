@@ -170,7 +170,7 @@ public class Board extends JPanel implements Runnable, Commons {
 
         if (deaths == NUMBER_OF_ALIENS_TO_DESTROY) {
             ingame = false;
-            message = "Ronnie är superduper bäst!!!";
+            message = "Game won!";
         }
 
         // player
@@ -327,12 +327,10 @@ public class Board extends JPanel implements Runnable, Commons {
 
           if (ingame)
           {
-//              if (e.isAltDown()) {
-                  
-        	  if (e.isControlDown()) {
-//                if (!shot.isVisible())
-                    shot = new Shot(x, y);
-            }
+        	  if (e.isAltDown()) {
+        		  if (!shot.isVisible())
+        			  shot = new Shot(x, y);
+        	  }
           }
         }
     }
