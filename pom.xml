@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.ronniehelin</groupId>
   <artifactId>SpaceInvaders</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>2.0.1-SNAPSHOT</version>
   <name>Space Invaders</name>
   
   <dependencies>
@@ -24,7 +24,7 @@
     <maven.compiler.release>17</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <javafx.version>17.0.2</javafx.version>
+    <javafx.version>17.0.17</javafx.version>
     <javafx.maven.plugin.version>0.0.8</javafx.maven.plugin.version>
   </properties>
   
