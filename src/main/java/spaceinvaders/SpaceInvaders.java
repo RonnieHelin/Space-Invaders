@@ -1,26 +1,30 @@
 package spaceinvaders;
 
-import javax.swing.JFrame;
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.layout.Pane;
+import javafx.stage.Stage;
 
-public class SpaceInvaders extends JFrame implements Commons {
+public class SpaceInvaders extends Application implements Commons {
 
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-
-	public SpaceInvaders()
-    {
-        add(new Board());
-        setTitle("Space Invaders");
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setSize(BOARD_WIDTH, BOARD_HEIGTH);
-        setLocationRelativeTo(null);
-        setVisible(true);
-        setResizable(false);
+    @Override
+    public void start(Stage primaryStage) {
+        Board board = new Board();
+        Pane root = new Pane();
+        root.getChildren().add(board);
+        
+        Scene scene = new Scene(root, BOARD_WIDTH, BOARD_HEIGTH);
+        
+        primaryStage.setTitle("Space Invaders");
+        primaryStage.setScene(scene);
+        primaryStage.setResizable(false);
+        primaryStage.show();
+        
+        // Request focus for keyboard input
+        board.requestFocus();
     }
 
     public static void main(String[] args) {
-        new SpaceInvaders();
+        launch(args);
     }
 }

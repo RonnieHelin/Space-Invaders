@@ -1,7 +1,6 @@
 package spaceinvaders;
 
-import javax.swing.ImageIcon;
-
+import javafx.scene.image.Image;
 
 public class Alien extends Sprite {
 
@@ -13,8 +12,8 @@ public class Alien extends Sprite {
         this.y = y;
 
         bomb = new Bomb(x, y);
-        ImageIcon ii = new ImageIcon(this.getClass().getResource(shot));
-        setImage(ii.getImage());
+        Image image = new Image(this.getClass().getResourceAsStream(shot));
+        setImage(image);
 
     }
 
@@ -28,15 +27,15 @@ public class Alien extends Sprite {
 
     public class Bomb extends Sprite {
 
-        private final String bomb = "../spacepix/bomb.png";
+        private final String bomb = "/spacepix/bomb.png";
         private boolean destroyed;
 
         public Bomb(int x, int y) {
             setDestroyed(true);
             this.x = x;
             this.y = y;
-            ImageIcon ii = new ImageIcon(this.getClass().getResource(bomb));
-            setImage(ii.getImage());
+            Image image = new Image(this.getClass().getResourceAsStream(bomb));
+            setImage(image);
         }
 
         public void setDestroyed(boolean destroyed) {

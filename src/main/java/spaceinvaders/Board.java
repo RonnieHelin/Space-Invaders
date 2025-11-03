@@ -1,28 +1,21 @@
 package spaceinvaders;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.Toolkit;
-import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-
 import java.util.ArrayList;
 import java.util.Random;
 
-import javax.swing.ImageIcon;
-import javax.swing.JPanel;
+import javafx.animation.AnimationTimer;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
+import javafx.scene.input.KeyCode;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 
+public class Board extends Canvas implements Commons { 
 
-public class Board extends JPanel implements Runnable, Commons { 
-
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	private Dimension d;
+    private GraphicsContext gc;
     private ArrayList <Alien> aliens;
     private Player player;
     private Shot shot;
@@ -33,28 +26,23 @@ public class Board extends JPanel implements Runnable, Commons {
     private int deaths = 0;
 
     private boolean ingame = true;
-//    private final String expl = "../spacepix/explosion.png";
-//    private final String alienpix = "../spacepix/alien.png";
     private final String expl = "/spacepix/explosion.png";
     private final String alienpix = "/spacepix/alien.png";
     private String message = "Game Over";
 
-    private Thread animator;
+    private AnimationTimer animationTimer;
 
     public Board() 
     {
+        super(BOARD_WIDTH, BOARD_HEIGTH);
+        this.gc = getGraphicsContext2D();
+        
+        setFocusTraversable(true);
+        
+        // Set up key event handling
+        setOnKeyPressed(e -> handleKeyPressed(e.getCode()));
+        setOnKeyReleased(e -> handleKeyReleased(e.getCode()));
 
-        addKeyListener(new TAdapter());
-        setFocusable(true);
-        d = new Dimension(BOARD_WIDTH, BOARD_HEIGTH);
-        setBackground(Color.black);
-
-        gameInit();
-        setDoubleBuffered(true);
-    }
-
-    public void addNotify() {
-        super.addNotify();
         gameInit();
     }
 
@@ -62,12 +50,12 @@ public class Board extends JPanel implements Runnable, Commons {
 
         aliens = new ArrayList<Alien>();
 
-        ImageIcon ii = new ImageIcon(this.getClass().getResource(alienpix));
+        Image alienImage = new Image(this.getClass().getResourceAsStream(alienpix));
 
         for (int i=0; i < 4; i++) {
             for (int j=0; j < 6; j++) {
                 Alien alien = new Alien(alienX + 18*j, alienY + 18*i);
-                alien.setImage(ii.getImage());
+                alien.setImage(alienImage);
                 aliens.add(alien);
             }
         }
@@ -75,18 +63,29 @@ public class Board extends JPanel implements Runnable, Commons {
         player = new Player();
         shot = new Shot();
 
-        if (animator == null || !ingame) {
-            animator = new Thread(this);
-            animator.start();
+        if (animationTimer == null || !ingame) {
+            animationTimer = new AnimationTimer() {
+                @Override
+                public void handle(long now) {
+                    if (ingame) {
+                        draw();
+                        animationCycle();
+                    } else {
+                        stop();
+                        gameOver();
+                    }
+                }
+            };
+            animationTimer.start();
         }
     }
 
-    public void drawAliens(Graphics g) 
+    public void drawAliens() 
     {
     	for (Alien alien : aliens) {
 
             if (alien.isVisible()) {
-                g.drawImage(alien.getImage(), alien.getX(), alien.getY(), this);
+                gc.drawImage(alien.getImage(), alien.getX(), alien.getY());
             }
 
             if (alien.isDying()) {
@@ -95,10 +94,10 @@ public class Board extends JPanel implements Runnable, Commons {
         }
     }
 
-    public void drawPlayer(Graphics g) {
+    public void drawPlayer() {
 
         if (player.isVisible()) {
-            g.drawImage(player.getImage(), player.getX(), player.getY(), this);
+            gc.drawImage(player.getImage(), player.getX(), player.getY());
         }
 
         if (player.isDying()) {
@@ -107,63 +106,56 @@ public class Board extends JPanel implements Runnable, Commons {
         }
     }
 
-    public void drawShot(Graphics g) {
+    public void drawShot() {
         if (shot.isVisible())
-            g.drawImage(shot.getImage(), shot.getX(), shot.getY(), this);
+            gc.drawImage(shot.getImage(), shot.getX(), shot.getY());
     }
 
-    public void drawBombing(Graphics g) {
+    public void drawBombing() {
 
     	for (Alien a : aliens) {
             Alien.Bomb b = a.getBomb();
 
             if (!b.isDestroyed()) {
-                g.drawImage(b.getImage(), b.getX(), b.getY(), this); 
+                gc.drawImage(b.getImage(), b.getX(), b.getY()); 
             }
         }
     }
 
-    public void paint(Graphics g)
+    public void draw()
     {
-      super.paint(g);
-
-      g.setColor(Color.black);
-      g.fillRect(0, 0, d.width, d.height);
-      g.setColor(Color.green);   
+      // Clear the canvas
+      gc.setFill(Color.BLACK);
+      gc.fillRect(0, 0, getWidth(), getHeight());
+      gc.setStroke(Color.GREEN);   
 
       if (ingame) {
 
-        g.drawLine(0, GROUND, BOARD_WIDTH, GROUND);
-        drawAliens(g);
-        drawPlayer(g);
-        drawShot(g);
-        drawBombing(g);
+        gc.strokeLine(0, GROUND, BOARD_WIDTH, GROUND);
+        drawAliens();
+        drawPlayer();
+        drawShot();
+        drawBombing();
       }
-
-      Toolkit.getDefaultToolkit().sync();
-      g.dispose();
     }
 
     public void gameOver()
     {
+        gc.setFill(Color.BLACK);
+        gc.fillRect(0, 0, BOARD_WIDTH, BOARD_HEIGTH);
 
-        Graphics g = this.getGraphics();
+        gc.setFill(Color.rgb(0, 32, 48));
+        gc.fillRect(50, BOARD_WIDTH/2 - 30, BOARD_WIDTH-100, 50);
+        gc.setStroke(Color.WHITE);
+        gc.strokeRect(50, BOARD_WIDTH/2 - 30, BOARD_WIDTH-100, 50);
 
-        g.setColor(Color.black);
-        g.fillRect(0, 0, BOARD_WIDTH, BOARD_HEIGTH);
-
-        g.setColor(new Color(0, 32, 48));
-        g.fillRect(50, BOARD_WIDTH/2 - 30, BOARD_WIDTH-100, 50);
-        g.setColor(Color.white);
-        g.drawRect(50, BOARD_WIDTH/2 - 30, BOARD_WIDTH-100, 50);
-
-        Font small = new Font("Helvetica", Font.BOLD, 14);
-        FontMetrics metr = this.getFontMetrics(small);
-
-        g.setColor(Color.white);
-        g.setFont(small);
-        g.drawString(message, (BOARD_WIDTH - metr.stringWidth(message))/2, 
-            BOARD_WIDTH/2);
+        Font font = Font.font("Helvetica", FontWeight.BOLD, 14);
+        gc.setFont(font);
+        gc.setFill(Color.WHITE);
+        
+        // Calculate text width for centering (approximate)
+        double textWidth = message.length() * 8; // Approximate character width
+        gc.fillText(message, (BOARD_WIDTH - textWidth)/2, BOARD_WIDTH/2);
     }
 
     public void animationCycle()  {
@@ -187,13 +179,12 @@ public class Board extends JPanel implements Runnable, Commons {
                 int alienY = alien.getY();
 
                 if (alien.isVisible() && shot.isVisible()) {
-                    if (shotX >= (alienX) && 
+                        if (shotX >= (alienX) && 
                         shotX <= (alienX + ALIEN_WIDTH) &&
                         shotY >= (alienY) &&
                         shotY <= (alienY+ALIEN_HEIGHT) ) {
-                            ImageIcon ii = 
-                                new ImageIcon(getClass().getResource(expl));
-                            alien.setImage(ii.getImage());
+                            Image explImage = new Image(getClass().getResourceAsStream(expl));
+                            alien.setImage(explImage);
                             alien.setDying(true);
                             deaths++;
                             shot.die();
@@ -270,9 +261,8 @@ public class Board extends JPanel implements Runnable, Commons {
                     bombX <= (playerX+PLAYER_WIDTH) &&
                     bombY >= (playerY) && 
                     bombY <= (playerY+PLAYER_HEIGHT) ) {
-                        ImageIcon ii = 
-                            new ImageIcon(this.getClass().getResource(expl));
-                        player.setImage(ii.getImage());
+                        Image explImage = new Image(this.getClass().getResourceAsStream(expl));
+                        player.setImage(explImage);
                         player.setDying(true);
                         b.setDestroyed(true);;
                     }
@@ -287,51 +277,23 @@ public class Board extends JPanel implements Runnable, Commons {
         }
     }
 
-    public void run() {
-
-        long beforeTime, timeDiff, sleep;
-
-        beforeTime = System.currentTimeMillis();
-
-        while (ingame) {
-            repaint();
-            animationCycle();
-
-            timeDiff = System.currentTimeMillis() - beforeTime;
-            sleep = DELAY - timeDiff;
-
-            if (sleep < 0) 
-                sleep = 2;
-            try {
-                Thread.sleep(sleep);
-            } catch (InterruptedException e) {
-                System.out.println("interrupted");
+    private void handleKeyPressed(KeyCode keyCode) {
+        if (keyCode == KeyCode.LEFT) {
+            player.setMovingLeft(true);
+        } else if (keyCode == KeyCode.RIGHT) {
+            player.setMovingRight(true);
+        } else if (keyCode == KeyCode.SPACE && ingame) {
+            if (!shot.isVisible()) {
+                shot = new Shot(player.getX(), player.getY());
             }
-            beforeTime = System.currentTimeMillis();
         }
-        gameOver();
     }
 
-    private class TAdapter extends KeyAdapter {
-
-        public void keyReleased(KeyEvent e) {
-            player.keyReleased(e);
-        }
-
-        public void keyPressed(KeyEvent e) {
-
-          player.keyPressed(e);
-
-          int x = player.getX();
-          int y = player.getY();
-
-          if (ingame)
-          {
-        	  if (e.isAltDown()) {
-        		  if (!shot.isVisible())
-        			  shot = new Shot(x, y);
-        	  }
-          }
+    private void handleKeyReleased(KeyCode keyCode) {
+        if (keyCode == KeyCode.LEFT) {
+            player.setMovingLeft(false);
+        } else if (keyCode == KeyCode.RIGHT) {
+            player.setMovingRight(false);
         }
     }
 }
