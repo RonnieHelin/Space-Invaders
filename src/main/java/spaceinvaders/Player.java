@@ -1,6 +1,5 @@
 package spaceinvaders;
 
-import java.awt.event.KeyEvent;
 import javafx.scene.image.Image;
 
 public class Player extends Sprite implements Commons{
@@ -36,34 +35,5 @@ public class Player extends Sprite implements Commons{
 
     public void setMovingRight(boolean moving) {
         dx = moving ? 2 : 0;
-    }
-
-    // Keep the old methods for compatibility, but they won't be used
-    public void keyPressed(KeyEvent e) {
-        int key = e.getKeyCode();
-
-        if (key == KeyEvent.VK_LEFT)
-        {
-            dx = -2;
-        }
-
-        if (key == KeyEvent.VK_RIGHT)
-        {
-            dx = 2;
-        }
-    }
-
-    public void keyReleased(KeyEvent e) {
-        int key = e.getKeyCode();
-
-        if (key == KeyEvent.VK_LEFT)
-        {
-            dx = 0;
-        }
-
-        if (key == KeyEvent.VK_RIGHT)
-        {
-            dx = 0;
-        }
     }
 }
