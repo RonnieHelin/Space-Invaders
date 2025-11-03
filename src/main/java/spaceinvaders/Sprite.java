@@ -1,6 +1,6 @@
 package spaceinvaders;
 
-import java.awt.Image;
+import javafx.scene.image.Image;
 
 public class Sprite {
 
